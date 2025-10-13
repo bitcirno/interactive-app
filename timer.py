@@ -15,7 +15,7 @@ class Timer(GraphicComponent):
         super().__init__(ctx)
         self.font = pygame.font.Font("font/04B_0.TTF", 8)
         self.font_large = pygame.font.Font("font/04B_0.TTF", 15)
-        self.pre_text = self.font.render(f"The dinosaur was active for", False, ctx.timer_text_color)
+        self.pre_text = self.font.render(f"Meters that dinosaur runs", False, ctx.timer_text_color)
         self.pre_text_rect = self.pre_text.get_rect()
         self.pre_text_rect.center = \
             round(ctx.win.resolution[0] * ctx.timer_text_offset_x_per), ctx.win.resolution[1] // 2

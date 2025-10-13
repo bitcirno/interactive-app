@@ -57,7 +57,7 @@ class Dino(GraphicComponent):
     def handle_event(self, event: Event):
         rot: int = 0
         change_dir = False
-        if event.key == pygame.K_UP or event.key == pygame.K_w:
+        if event.key == pygame.K_UP:
             if self.dir == 3:
                 return
             self.dir = 3
@@ -66,7 +66,7 @@ class Dino(GraphicComponent):
             rot = 180
             self.is_update_suspend = True
             change_dir = True
-        elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+        elif event.key == pygame.K_DOWN:
             if self.dir == 0:
                 return
             self.dir = 0
@@ -75,7 +75,7 @@ class Dino(GraphicComponent):
             rot = 0
             self.is_update_suspend = True
             change_dir = True
-        elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+        elif event.key == pygame.K_LEFT:
             if self.dir == 2:
                 return
             self.dir = 2
@@ -84,7 +84,7 @@ class Dino(GraphicComponent):
             rot = 270
             self.is_update_suspend = True
             change_dir = True
-        elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+        elif event.key == pygame.K_RIGHT:
             if self.dir == 1:
                 return
             self.dir = 1
@@ -93,6 +93,8 @@ class Dino(GraphicComponent):
             rot = 90
             self.is_update_suspend = True
             change_dir = True
+        else:
+            return
 
         if change_dir:
             self.suspend_de_acc_tween.to_float(self.ctx.dino_suspend_init_spd, self.ctx.dino_suspend_spd,
@@ -126,8 +128,7 @@ class Dino(GraphicComponent):
         # update position
         if self.is_update_suspend:
             pts = self.ctx.win.delta_time
-            self.rect.x = round(self.rect.x + pts * self.vx())
-            self.rect.y = round(self.rect.y + pts * self.vy())
+            self.rect.move_ip(pts * self.vx(), pts * self.vy())
 
             ep = self.ctx.ground_edge_px
             wh = self.ctx.win.resolution

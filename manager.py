@@ -5,71 +5,72 @@ NAME: LUO DONGPU
 Game manager module controlling the game rules and flow
 """
 
+import time
+import pygame
+from utils import *
+import random
 from context import Context
-from random import randint
+from cactus import Cactus
+from comp import *
 
 
 class Manager(object):
     def __init__(self, ctx: Context):
         self.ctx: Context = ctx
         self.ctx.mgr = self
-        self.width = 300
-        self.height = self.width
-        self.title = "cube jump"
-        self.cube_range = [10, self.width - 10]
+        self.next_gen_time = 0
 
-        # game manager
-        self.COUNT = None
-        self.game_over = False
-        self.counter = 0
-        self.next_c = randint(10, 20)
-        self.next_c_range = [30, 60]
-        self.obs = list()
-        self.font = pygame.font.SysFont("Aria", 30)
-        self.font2 = pygame.font.SysFont("Aria", 16)
-        self.game_over_text = self.font.render("Game Over", True, (129, 59, 9))
-        self.game_over_text_rect = self.game_over_text.get_rect(center=(self.width / 2, self.height / 2))
-        self.restart_text = self.font2.render("Press space to restart", True, (149, 79, 29))
-        self.restart_text_rect = self.restart_text.get_rect(center=(self.width / 2, self.height / 2 + 28))
+        self.cactus_imgs = [pygame.image.load(f"imgs/cactus/cactus{i}.png")
+                            for i in range(1, ctx.cactus_types+1)]
+        self.active_cactus = []
 
-        self.obs_edge_range = [8, 22]
+    def update(self):
+        # remove inactive cactus (out of screen)
+        for i in range(len(self.active_cactus)-1, -1, -1):
+            if not self.active_cactus[i].is_active:
+                self.active_cactus.pop(i)
 
-    def update(self, pts, cube):
-        self.__generate_obstacle(cube)
-        self.__obs_update(pts, cube)
+        if time.time() > self.next_gen_time:
+            interval = get_random_float_between(*self.ctx.gen_interval_range)
+            self.next_gen_time = time.time() + interval
 
-    def __generate_obstacle(self, cube):
-        self.counter += 1
-        if self.counter == self.next_c:
-            for _ in range(3):
-                self.obs.append(Obstacle(self, self.obs_edge_range))
-            self.next_c = self.counter + randint(self.next_c_range[0], self.next_c_range[1])
-        if self.counter == 300 or self.counter == 500 or self.counter == 700:
-            self.next_c_range[0] -= 2
-            self.next_c_range[1] -= 2
-            self.obs_edge_range[0] += 2
-            self.obs_edge_range[1] += 5
-            cube.decrease_suspension_time()
+            img = random.choice(self.cactus_imgs)
+            if random.random() < 0.5:
+                img = pygame.transform.flip(img, True, False)  # random flip
 
-    def __obs_update(self, pts, cube):
-        for o in self.obs:
-            o.update(pts, cube)
-        for o in self.obs:
-            if not o.enabled:
-                self.obs.remove(o)
+            rect = img.get_rect()
+            track = random.randint(0, 3)
+            reso = self.ctx.win.resolution
+            edge = self.ctx.ground_edge_px
+            speed = get_random_float_between(*self.ctx.gen_speed_range)
+            vx = 0
+            vy = 0
 
-    def obs_display(self):
-        for o in self.obs:
-            o.display()
-        if self.game_over:
-            self.screen.blit(self.game_over_text, self.game_over_text_rect)
-            self.screen.blit(self.restart_text, self.restart_text_rect)
+            if track == 0:  # bottom
+                rect.bottomleft = reso[0], reso[1]-edge
+                vx = -speed
+            elif track == 1:  # right
+                img = pygame.transform.rotate(img, 90)
+                rect.size = rect.height, rect.width
+                rect.bottomright = reso[0]-edge, 0
+                vy = speed
+            elif track == 2:  # top
+                img = pygame.transform.flip(img, False, True)
+                rect.topright = 0, edge
+                vx = speed
+            else:  # left
+                img = pygame.transform.rotate(img, -90)
+                rect.size = rect.height, rect.width
+                rect.topleft = edge, reso[1]
+                vy = -speed
 
-    def restart_game(self, cube):
-        cube.reset()
-        self.game_over = False
-        self.counter = 0
-        self.next_c = randint(10, 20)
-        self.next_c_range = [30, 60]
-        self.obs = list()
-        self.obs_edge_range = [8, 22]
+            cactus = Cactus(self.ctx, img, rect, vx, vy)
+            self.active_cactus.append(cactus)
+
+        for cactus in self.active_cactus:
+            cactus.update()
+
+    def render_cactus(self):
+        # print(len(self.active_cactus))
+        for cactus in self.active_cactus:
+            cactus.render()

@@ -1,3 +1,6 @@
+import random
+
+
 def clamp_angle(angle):
     """
     clamp the input angle to [-360, 360]
@@ -32,3 +35,7 @@ def shortest_arc(a, b):
         return a, b_new
 
     return a, b
+
+
+def get_random_float_between(a, b):
+    return a + (b - a) * random.random()

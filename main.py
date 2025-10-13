@@ -9,21 +9,20 @@ import pygame
 from random import randint
 
 from context import Context
-# from manager import Manager
+from manager import Manager
 from win import PixelGameWindow
 from dinosaur import Dino
 from ground import Ground
 from tween import Tween
-from cactus import Cactus
 from timer import Timer
 
 
 pygame.init()
-pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
+# pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
 
 ctx = Context()
 win = PixelGameWindow(ctx, (240, 240), (540, 540), "4xDinosaur", 60)
-# mgr = Manager(ctx)
+mgr = Manager(ctx)
 dino = Dino(ctx)
 timer = Timer(ctx)
 ground = Ground(ctx)
@@ -38,22 +37,23 @@ while True:
 
     # handle events
     is_running = True
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             is_running = False
             break
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            win.handle_event(event)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 is_running = False
                 break
+            ctx.handle_event(event)
             dino.handle_event(event)
 
     if not is_running:
         break
 
     # update game components
+    mgr.update()
     timer.update()
     ground.update()
     dino.update()
@@ -64,6 +64,7 @@ while True:
     # render game components
     timer.render()
     ground.render()
+    mgr.render_cactus()
     dino.render()
 
     # final blit event by visual window

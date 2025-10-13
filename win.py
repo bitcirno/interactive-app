@@ -43,19 +43,11 @@ class PixelGameWindow:
         # self.__screen_shader.send("speed", 3)
         self.__app_start_time: float = time.time()
 
-        # events
-        self.is_left_pointer_down: bool = False  # is pointer down this frame?
-
         # real-time fps calculation
         self.fps_accum_target: int = 10
         self.fps_accum_count: int = 0
         self.fps_accum_time: float = 0.0
         self.smoothed_fps: int = fps
-
-    def handle_event(self, event):
-        self.is_left_pointer_down = False
-        if event.button == 1:
-            self.is_left_pointer_down = True
 
     def __calculate_smooth_fps(self):
         self.fps_accum_count += 1
