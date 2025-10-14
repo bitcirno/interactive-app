@@ -119,7 +119,7 @@ class Tween:
         self.is_tweening = False
 
     def to_float(self, source: float, target: float,
-                 duration: float, setter: Callable,
+                 duration: float, setter: Callable|None,
                  onComplete: Callable = None, ease: Ease = Ease.OutQuad) -> None:
         self.lerp_type = LerpType.Float
         self.src_float = source

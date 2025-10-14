@@ -64,6 +64,8 @@ class Dino(GraphicComponent):
             self.vx = self.__get_zero_speed
             self.vy = self.__get_negative_suspend_speed
             rot = 180
+            if not self.is_update_suspend:
+                self.ctx.timer.restart_suspend_timer()
             self.is_update_suspend = True
             change_dir = True
         elif event.key == pygame.K_DOWN:
@@ -73,6 +75,8 @@ class Dino(GraphicComponent):
             self.vx = self.__get_zero_speed
             self.vy = self.__get_suspend_speed
             rot = 0
+            if not self.is_update_suspend:
+                self.ctx.timer.restart_suspend_timer()
             self.is_update_suspend = True
             change_dir = True
         elif event.key == pygame.K_LEFT:
@@ -82,6 +86,8 @@ class Dino(GraphicComponent):
             self.vx = self.__get_negative_suspend_speed
             self.vy = self.__get_zero_speed
             rot = 270
+            if not self.is_update_suspend:
+                self.ctx.timer.restart_suspend_timer()
             self.is_update_suspend = True
             change_dir = True
         elif event.key == pygame.K_RIGHT:
@@ -91,6 +97,8 @@ class Dino(GraphicComponent):
             self.vx = self.__get_suspend_speed
             self.vy = self.__get_zero_speed
             rot = 90
+            if not self.is_update_suspend:
+                self.ctx.timer.restart_suspend_timer()
             self.is_update_suspend = True
             change_dir = True
         else:
@@ -158,6 +166,7 @@ class Dino(GraphicComponent):
         self.vx = 0
         self.vy = 0
         self.is_update_suspend = False
+        self.ctx.timer.stop_suspend_timer()
 
     def render(self):
         frames = self.bend_frames if self.is_update_suspend else self.run_frames
