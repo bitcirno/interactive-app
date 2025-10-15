@@ -6,7 +6,6 @@ uniform sampler2D imageTexture;
 
 uniform float speed;
 uniform float time;
-uniform vec2 resolution;
 
 void main() {
     vec2 uv1 = fragmentTexCoord;

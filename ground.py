@@ -36,6 +36,10 @@ class Ground(GraphicComponent):
         self.ground_shader.send("speed", ctx.ground_move_speed)
         # self.ground_shader.send("resolution", self.sprite.get_rect().size)
 
+    def set_inv_move_speed(self, is_invincible: bool):
+        self.ground_shader.send("speed",
+                                self.ctx.ground_inv_move_speed if is_invincible else self.ctx.ground_move_speed)
+
     def update(self):
         self.ground_shader.send("time", self.ctx.win.app_time)
 

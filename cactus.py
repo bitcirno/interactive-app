@@ -46,9 +46,9 @@ class Cactus(GraphicComponent):
                     dir_x = self.rect.centerx - self.ctx.dino.col_rect.midbottom[0]+0.00001  # avoid 0-division
                     dir_y = self.rect.centery - self.ctx.dino.col_rect.midbottom[1]
                     self.invincible_hit_dir = Vector2(dir_x, dir_y).normalize()  # calculate hit direction
+                    self.ctx.mgr.invincible_hit_cactus_bonus()  # get bonus
                 else:
                     print("hit")
-                    exit(-1)
                     ...
 
         if not self.rect.colliderect(self.ctx.win.px_rect):  # out screen

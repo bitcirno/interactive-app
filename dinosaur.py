@@ -28,6 +28,7 @@ class Dino(GraphicComponent):
         self.tar_rot: float = 0.0
         self.is_update_suspend = True
         self.dir: int = 0
+        self.anim_duration = ctx.dino_anim_duration
 
         # animation
         self.run_frames = [
@@ -105,7 +106,8 @@ class Dino(GraphicComponent):
             return
 
         if change_dir:
-            self.suspend_de_acc_tween.to_float(self.ctx.dino_suspend_init_spd, self.ctx.dino_suspend_spd,
+            vel = self.ctx.dino_suspend_inv_spd if self.ctx.mgr.invincible_mode else self.ctx.dino_suspend_spd
+            self.suspend_de_acc_tween.to_float(self.ctx.dino_suspend_init_spd, vel,
                                                self.ctx.dino_suspend_de_acc_duration,
                                                self.__set_suspend_spd, ease=Ease.OutCubic)
 
@@ -113,8 +115,9 @@ class Dino(GraphicComponent):
             self.cur_rot, self.tar_rot = shortest_arc(self.cur_rot, rot)
             # print(self.cur_rot, self.tar_rot)
             duration = 0.001+self.ctx.dino_rot_duration * abs(self.tar_rot - self.cur_rot) / 90
-            self.rot_tween.to_float(self.cur_rot, self.tar_rot, duration,
-                                    self.__set_rot, ease=Ease.OutQuad)
+            if not self.ctx.mgr.invincible_mode:
+                self.rot_tween.to_float(self.cur_rot, self.tar_rot, duration,
+                                        self.__set_rot, ease=Ease.OutQuad)
 
     def __get_suspend_speed(self) -> float:
         return self.v
@@ -132,6 +135,15 @@ class Dino(GraphicComponent):
     def __set_suspend_spd(self, spd: float):
         self.v = spd
 
+    def set_invincible_speed(self, is_invincible: bool):
+        if is_invincible:
+            self.anim_duration = self.ctx.dino_anim_inv_duration
+            self.next_frame_time = time.time() + self.anim_duration
+            self.v = self.ctx.dino_suspend_inv_spd
+        else:
+            self.anim_duration = self.ctx.dino_anim_duration
+            self.v = self.ctx.dino_suspend_spd
+
     def update(self):
         # update position
         if self.is_update_suspend:
@@ -140,6 +152,9 @@ class Dino(GraphicComponent):
 
             ep = self.ctx.ground_edge_px
             wh = self.ctx.win.resolution
+
+            if self.ctx.mgr.invincible_mode:
+                self.cur_rot += pts * self.ctx.dino_inv_rot_speed
 
             if self.rect.left < ep:
                 self.rect.left = ep
@@ -159,7 +174,7 @@ class Dino(GraphicComponent):
         # update animation
         if time.time() > self.next_frame_time:
             frames = self.bend_frames if self.is_update_suspend else self.run_frames
-            self.next_frame_time = time.time() + self.ctx.dino_anim_duration
+            self.next_frame_time = time.time() + self.anim_duration
             self.sprite_idx = (self.sprite_idx + 1) % len(frames)
 
     def __ground(self):
@@ -167,11 +182,15 @@ class Dino(GraphicComponent):
         self.vy = 0
         self.is_update_suspend = False
         self.ctx.timer.stop_suspend_timer()
+        if self.ctx.mgr.invincible_mode:
+            self.cur_rot = self.tar_rot
 
     def render(self):
         frames = self.bend_frames if self.is_update_suspend else self.run_frames
-        self.sprite = pygame.transform.rotate(frames[self.sprite_idx], self.cur_rot)
-        self.ctx.win.display.blit(self.sprite, self.rect)
+        self.sprite = frames[self.sprite_idx]
+        img = self.sprite
+        img = pygame.transform.rotate(img, self.cur_rot)
+        self.ctx.win.display.blit(img, self.rect)
 
         if self.ctx.debug_rect:
             pygame.draw.rect(self.ctx.win.display, (255, 0, 0), self.col_rect, width=1)

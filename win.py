@@ -58,6 +58,9 @@ class PixelGameWindow:
             self.fps_accum_count = 0
             self.fps_accum_time = 0.0
 
+    def set_post_reverse(self, is_reverse: bool):
+        self.__screen_shader.send("invincible", 1.0 if is_reverse else 0.0)
+
     def early_update(self):
         """
         Update import data (time etc) at first of a frame
@@ -66,6 +69,7 @@ class PixelGameWindow:
         self.app_time = time.time() - self.__app_start_time
         self.delta_time = self.clock.get_time() / 1000.0
         self.__calculate_smooth_fps()
+        self.__screen_shader.send("time", self.app_time)
 
     def final_blit_event(self):
         self.__screen_shader.render_direct(self.full_rect)

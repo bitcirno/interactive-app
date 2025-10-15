@@ -28,9 +28,7 @@ timer = Timer(ctx)
 ground = Ground(ctx)
 
 mgr.bind_timer_events(timer)
-
-timer.restart_round()
-
+mgr.restart_round()
 
 while True:
 
@@ -69,6 +67,8 @@ while True:
     mgr.render_cactus()
     dino.render()
     mgr.render_top_shine()
+
+    mgr.late_update()
 
     # final blit event by visual window
     win.final_blit_event()

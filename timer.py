@@ -28,6 +28,11 @@ class Timer(GraphicComponent):
         self.round_start_time = 0
         self.round_last_time = 0
 
+        # meter text animation
+        self.is_meter_text_scaling = False
+        self.meter_text_scale_tween = Tween()
+        self.meter_text_scale = 1.0
+
         # difficulty step bar
         self.dif_step: int = 0
         self.next_dif_step_time: int = 0
@@ -52,6 +57,9 @@ class Timer(GraphicComponent):
         self.invincible_bar_rect = pygame.Rect(0, 0, *self.ctx.win.resolution)
         self.invincible_bar_color: Color = Color("white")
 
+    def __set_meter_txet_scale(self, scale: float):
+        self.meter_text_scale = scale
+
     def update_invincible_bar(self, per: float):  # 1 -> 0
         self.invincible_bar_rect.height = self.ctx.win.resolution[1] * per
         self.invincible_bar_color = self.ctx.invincible_bar_color2.lerp(self.ctx.invincible_bar_color1, per)
@@ -69,6 +77,16 @@ class Timer(GraphicComponent):
                              (rect_x, 0, self.dif_bar_width, self.dif_bar_width), width)
             rect_x += self.dif_bar_width + self.dif_bar_interval_width
         # pygame.image.save(self.dif_step_bar, "dif_step_bar.png")
+
+    def __disable_meter_text_scale(self):
+        self.is_meter_text_scaling = False
+
+    def meter_text_scale_highlight(self):
+        self.is_meter_text_scaling = True
+        self.meter_text_scale_tween.to_float(self.ctx.meter_text_scale_large, 1.0,
+                                             self.ctx.meter_text_scale_upp_duration,
+                                             self.__set_meter_txet_scale, self.__disable_meter_text_scale,
+                                             Ease.OutCubic)
 
     def update(self):
         self.round_last_time = time.time() - self.round_start_time
@@ -89,7 +107,9 @@ class Timer(GraphicComponent):
 
         # render meter text
         self.ctx.win.display.blit(self.pre_text, self.pre_text_rect)
-        text = self.font_large.render(f"{self.round_last_time: .2f}", True, self.ctx.UI_color)
+        text = self.font_large.render(f"{self.ctx.mgr.meter_scores: .2f}", True, self.ctx.UI_color)
+        if self.is_meter_text_scaling:
+            text = pygame.transform.scale_by(text, self.meter_text_scale)
         rect = text.get_rect()
         rect.midleft = self.pre_text_rect.midright
         self.ctx.win.display.blit(text, rect)
